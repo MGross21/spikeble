@@ -1,5 +1,9 @@
 # Source: https://github.com/LEGO/spike-prime-docs/blob/main/examples/python/messages.py
 
+from __future__ import annotations
+from abc import ABC
+import struct
+
 __all__ = [
     "BaseMessage",
     "StatusResponse",
@@ -20,11 +24,6 @@ __all__ = [
     "DeviceNotification",
     "deserialize",
 ]
-
-from __future__ import annotations
-from abc import ABC
-import struct
-
 class BaseMessage(ABC):
     @property
     def ID(cls) -> int:
