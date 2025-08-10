@@ -209,13 +209,13 @@ class Spike:
             raise RuntimeError("Call get_info() first")
         return self._info
     
-
-async def run(program:str, slot:int = 0, name:str = "program.py", stay_connected:bool = False):
-    async with Spike(timeout=10, slot=slot) as hub:
-        await hub.get_info()
-        await hub.enable_notifications()
-        await hub.clear_slot()
-        await hub.upload_program(program, name=name)
-        await hub.start_program()
-        if stay_connected:
-            await hub.run_until_disconnect()
+    @staticmethod
+    async def run(program:str, slot:int = 0, name:str = "program.py", stay_connected:bool = False):
+        async with Spike(timeout=10, slot=slot) as hub:
+            await hub.get_info()
+            await hub.enable_notifications()
+            await hub.clear_slot()
+            await hub.upload_program(program, name=name)
+            await hub.start_program()
+            if stay_connected:
+                await hub.run_until_disconnect()
