@@ -152,18 +152,29 @@ class DeviceNotification(BaseMessage):
         self.size = size
         self._payload = payload
         self.messages = []
+        self.unknown_id: int | None = None
+        self.raw_tail: bytes | None = None
+
         data = payload[:]
         while data:
-            id = data[0]
-            if id in DEVICE_MESSAGE_MAP:
-                name, fmt = DEVICE_MESSAGE_MAP[id]
-                sz = struct.calcsize(fmt)
-                values = struct.unpack(fmt, data[:sz])
-                self.messages.append((name, values))
-                data = data[sz:]
-            else:
-                print(f"Unknown message: {id}")
+            msg_id = data[0]
+            spec = DEVICE_MESSAGE_MAP.get(msg_id)
+            if not spec:
+                self.unknown_id = msg_id
+                self.raw_tail = data  # preserve for reverse-engineering
+                # print(f"Unknown message: 0x{msg_id:02X}, tail={data[:16].hex(' ')}")
                 break
+
+            name, fmt = spec
+            sz = struct.calcsize(fmt)
+            if len(data) < sz:
+                # truncated; stop cleanly
+                self.raw_tail = data
+                break
+
+            values = struct.unpack(fmt, data[:sz])
+            self.messages.append((name, values))
+            data = data[sz:]
 
     @staticmethod
     def deserialize(data: bytes) -> DeviceNotification:
