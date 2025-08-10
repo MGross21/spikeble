@@ -4,6 +4,19 @@ class UUID:
     - RX: for receiving data (from the hub's perspective)
     - TX: for transmitting data (from the hub's perspective)
     """
+    # SERVICE = "0000FD02-0000-1000-8000-00805F9B34FB"
     SERVICE = "0000FD02-0000-1000-8000-00805F9B34FB"
     RX = "0000FD02-0001-1000-8000-00805F9B34FB"
     TX = "0000FD02-0002-1000-8000-00805F9B34FB"
+
+class Hardware:
+    MAC_ADDR = "3C:E4:B0:AB:D3:3A"
+
+class Name:
+    HINTS = [
+        "SPIKE",
+        "Spike",
+        "Prime",
+        "Hub",
+        "Lego"
+    ] + [str(i) for i in range(1, 100)]

@@ -4,9 +4,9 @@ from bleak.exc import BleakDBusError
 import warnings
 
 try:
-    from .lib import UUID, pack, unpack
+    from .lib import UUID, pack, unpack, DELIMITER
 except ImportError:
-    from lib import UUID, pack, unpack
+    from lib import UUID, pack, unpack, DELIMITER
 
 
 class Bluetooth:
@@ -84,7 +84,7 @@ class Bluetooth:
         self._inbuf.extend(data)
         while True:
             try:
-                idx = self._inbuf.index(_DELIM)
+                idx = self._inbuf.index(DELIMITER)
             except ValueError:
                 break  # no full frame yet
             frame = bytes(self._inbuf[: idx + 1])
