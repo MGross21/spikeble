@@ -12,7 +12,15 @@ def _port_num(p):  # accept enum or 'A'..'F'
         return p
     raise ValueError(f"Invalid port: {p}")
 
+class Port:
+    IMPORT = "from hub import port"
 
+    A = f"{__qualname__}.A"
+    B = f"{__qualname__}.B"
+    C = f"{__qualname__}.C"
+    D = f"{__qualname__}.D"
+    E = f"{__qualname__}.E"
+    F = f"{__qualname__}.F"
 
 class Motor:
     def __init__(self, port: HubPort | str, type: MotorDeviceType):
@@ -39,5 +47,5 @@ class Motor:
             raise ValueError(f"Speed must be between {min_speed} and {max_speed} for {self.type.name}")
         return f"""
 import {self.PACKAGE}
-{self.PACKAGE}.{self.run_for_degrees.__name__}({self.port}, {degrees}, {velocity})
+{self.PACKAGE}.run_for_degrees({Port.E}, {degrees}, {velocity})
 """

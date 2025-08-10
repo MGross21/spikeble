@@ -14,7 +14,9 @@ from spike.lib.enumeration import MotorDeviceType, HubPort
 async def test_motor_degrees():
     async with Hub() as hub:
         motor = Motor(port=HubPort.A, type=MotorDeviceType.SMALL)
-        await motor.run_for_degrees(hub, degrees=90, velocity=100)
+        code = motor.run_for_degrees(degrees=90, velocity=100)
+        print(code)
+        await hub.run_source(slot=2, source=code)
 
 if __name__ == "__main__":
     asyncio.run(test_motor_degrees())
