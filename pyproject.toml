@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling>=1.27", "hatch-vcs>=0.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "spikeble"
+description = "BLE interface for running Micropython on LEGO SPIKE devices"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Michael Gross", email = "MGross21@users.noreply.github.com" }]
+keywords = ["lego", "spike", "ble", "bluetooth", "robotics"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: System :: Hardware",
+]
+dependencies = ["bleak>=1.0.0"]
+
+# Use Git tags for versioning (e.g., v0.3.1 -> 0.3.1)
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/MGross21/lego-spike"
+Repository = "https://github.com/MGross21/lego-spike"
+Issues = "https://github.com/MGross21/lego-spike/issues"
+
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.0.0"
+raw-options = { local_scheme = "no-local-version" }
+
+[tool.hatch.build.targets.wheel]
+packages = ["spike"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/spike", "/README.md", "/LICENSE*", "/pyproject.toml"]
+
+# ---- Tooling ---------------------------------------------------------------
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+lint.select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = ["tests"]

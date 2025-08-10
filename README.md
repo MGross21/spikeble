@@ -1,6 +1,6 @@
 # Lego Spike
 
-A Python library for the LEGO® Spike™ platform.
+BLE interface for running MicroPython on LEGO® SPIKE™ devices.  
 
 ![Lego Spike](assets/lego_spike.png)
 
