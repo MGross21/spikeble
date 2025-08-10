@@ -4,26 +4,6 @@ from __future__ import annotations
 from abc import ABC
 import struct
 
-__all__ = [
-    "BaseMessage",
-    "StatusResponse",
-    "InfoRequest",
-    "InfoResponse",
-    "ClearSlotRequest",
-    "ClearSlotResponse",
-    "StartFileUploadRequest",
-    "StartFileUploadResponse",
-    "TransferChunkRequest",
-    "TransferChunkResponse",
-    "ProgramFlowRequest",
-    "ProgramFlowResponse",
-    "ProgramFlowNotification",
-    "ConsoleNotification",
-    "DeviceNotificationRequest",
-    "DeviceNotificationResponse",
-    "DeviceNotification",
-    "deserialize",
-]
 class BaseMessage(ABC):
     @property
     def ID(cls) -> int:
