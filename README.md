@@ -9,9 +9,7 @@ BLE interface for running MicroPython on LEGO® SPIKE™ devices.
 To install the package, clone the repository and install it using pip:
 
 ```bash
-git clone https://github.com/MGross21/lego-spike
-cd lego-spike
-pip install .
+pip install git+https://github.com/MGross21/spikeble.git
 ```
 
 > **⚠️ Warning:**  
