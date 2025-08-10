@@ -19,8 +19,6 @@ classifiers = [
   "Topic :: System :: Hardware",
 ]
 dependencies = ["bleak>=1.0.0"]
-
-# Use Git tags for versioning (e.g., v0.3.1 -> 0.3.1)
 dynamic = ["version"]
 
 [project.urls]
@@ -35,6 +33,22 @@ raw-options = { local_scheme = "no-local-version" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["spikeble"]
+include = ["spikeble/py.typed"]
+
+# Expose MicroPython folders as top-level install packages
+[tool.hatch.build.targets.wheel.force-include]
+"spikeble/micropython/app" = "app"
+"spikeble/micropython/color" = "color"
+"spikeble/micropython/color_matrix" = "color_matrix"
+"spikeble/micropython/color_sensor" = "color_sensor"
+"spikeble/micropython/device" = "device"
+"spikeble/micropython/distance_sensor" = "distance_sensor"
+"spikeble/micropython/force_sensor" = "force_sensor"
+"spikeble/micropython/hub" = "hub"
+"spikeble/micropython/motor" = "motor"
+"spikeble/micropython/motor_pair" = "motor_pair"
+"spikeble/micropython/orientation" = "orientation"
+"spikeble/micropython/runloop" = "runloop"
 
 [tool.hatch.build.targets.sdist]
 include = ["/spikeble", "/README.md", "/LICENSE*", "/pyproject.toml"]
