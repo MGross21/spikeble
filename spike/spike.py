@@ -8,10 +8,10 @@ from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 from bleak.backends.characteristic import BleakGATTCharacteristic
 
-from .lib.connection import UUID
-from .lib import cobs
-from .lib.crc import crc
-from .lib.messages import *  # BaseMessage, InfoRequest, InfoResponse, etc.
+from ._lib.connection import UUID
+from ._lib import cobs
+from ._lib.crc import crc
+from ._lib.messages import *  # BaseMessage, InfoRequest, InfoResponse, etc.
 
 TM = TypeVar("TM", bound="BaseMessage")
 
