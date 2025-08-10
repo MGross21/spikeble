@@ -10,7 +10,7 @@ from typing import Optional, Type, TypeVar
 from bleak import BleakScanner, BleakClient
 from bleak.exc import BleakError
 
-from lib.connection import UUID  # SERVICE, RX, TX
+from lib.connection import UUID, Name  # optional defaults/hints
 from lib.cobs import pack as cobs_pack, unpack as cobs_unpack, DELIMITER
 from lib.crc import crc
 from lib.messages import (
@@ -27,14 +27,21 @@ TM = TypeVar("TM", bound=BaseMessage)
 
 
 class Hub:
-    """SPIKE Prime hub over SPIKE App 3 BLE."""
+    """SPIKE Prime hub over SPIKE App 3 BLE. Dynamic service/characteristic resolution."""
+
+    # Accept lists to permit future variants. Defaults use lib.connection.UUID.
+    SERVICE_UUIDS = [UUID.SERVICE.lower()]
+    RX_UUIDS = [UUID.RX.lower()]
+    TX_UUIDS = [UUID.TX.lower()]
+
+    NAME_HINTS = [h.lower() for h in getattr(Name, "HINTS", [])]
 
     def __init__(self, *, address: Optional[str] = None, timeout: float = 15.0):
         self.timeout = timeout
         self.address = address
         self.client: Optional[BleakClient] = None
 
-        self._service_uuid = UUID.SERVICE.lower()
+        self._service_uuid: Optional[str] = None
         self._rx_uuid: Optional[str] = None
         self._tx_uuid: Optional[str] = None
         self._rx_props: set[str] = set()
@@ -47,6 +54,8 @@ class Hub:
         self._lock = asyncio.Lock()
         self.info: Optional[InfoResponse] = None
 
+    # ---- context ----
+
     async def __aenter__(self):
         await self.connect()
         return self
@@ -54,26 +63,78 @@ class Hub:
     async def __aexit__(self, exc_type, exc, tb):
         await self.disconnect()
 
-    # ---- connection ----
+    # ---- discovery ----
 
     async def _pick_device(self):
+        """Find device by explicit address, service UUID, or name hints."""
         if self.address:
             return self.address
 
-        def by_service(dev, adv):
-            return any(u.lower() == self._service_uuid for u in (adv.service_uuids or []))
+        known_services = set(self.SERVICE_UUIDS)
 
-        dev = await BleakScanner.find_device_by_filter(by_service, timeout=self.timeout)
+        def by_adv(dev, adv):
+            uuids = [u.lower() for u in (adv.service_uuids or [])]
+            if any(u in known_services for u in uuids):
+                return True
+            name = (dev.name or "").lower()
+            return any(h in name for h in self.NAME_HINTS)
+
+        dev = await BleakScanner.find_device_by_filter(by_adv, timeout=self.timeout)
         if dev:
             return dev
 
+        # Fallback: full discovery
         for d in await BleakScanner.discover(timeout=self.timeout):
-            det = getattr(d, "details", None)
-            uuids = (det.get("uuids") or []) if isinstance(det, dict) else []
-            if any(u.lower() == self._service_uuid for u in uuids):
+            name = (getattr(d, "name", "") or "").lower()
+            if any(h in name for h in self.NAME_HINTS):
                 return d
+        raise RuntimeError("No SPIKE hub found")
 
-        raise RuntimeError(f"No SPIKE hub advertising {self._service_uuid}")
+    async def _resolve_uuids(self, client: BleakClient):
+        """Map actual RX/TX by exact UUIDs or, failing that, by properties."""
+        services = client.services if hasattr(client, "services") else await client.get_services()
+
+        svc = next((s for s in services if s.uuid.lower() in self.SERVICE_UUIDS), None)
+        if not svc:
+            # try any service that contains both notify and write chars
+            candidate = None
+            for s in services:
+                has_notify = any("notify" in set(c.properties or []) for c in s.characteristics)
+                has_write = any({"write", "write-without-response"} & set(c.properties or []) for c in s.characteristics)
+                if has_notify and has_write:
+                    candidate = s
+                    break
+            if not candidate:
+                raise RuntimeError("SPIKE service not found")
+            svc = candidate
+
+        # Try exact UUIDs first
+        rx = next((c for c in svc.characteristics if c.uuid.lower() in self.RX_UUIDS), None)
+        tx = next((c for c in svc.characteristics if c.uuid.lower() in self.TX_UUIDS), None)
+
+        # Fallback: by properties
+        if not rx or not tx:
+            for ch in svc.characteristics:
+                props = set(ch.properties or [])
+                if not tx and "notify" in props:
+                    tx = ch
+                if not rx and ({"write", "write-without-response"} & props):
+                    rx = ch
+
+        if not rx or not tx:
+            raise RuntimeError("RX/TX characteristics not found")
+
+        rx_props = set(rx.properties or [])
+        if not ({"write", "write-without-response"} & rx_props):
+            raise RuntimeError("Mapped RX not writable")
+        if "notify" not in set(tx.properties or []):
+            raise RuntimeError("Mapped TX not notifiable")
+
+        self._service_uuid = svc.uuid
+        self._rx_uuid, self._tx_uuid = rx.uuid, tx.uuid
+        self._rx_props = rx_props
+
+    # ---- connection ----
 
     async def connect(self):
         target = await self._pick_device()
@@ -85,66 +146,40 @@ class Hub:
         if not client.is_connected:
             raise RuntimeError("Bluetooth connect failed")
 
-        services = client.services if hasattr(client, "services") else await client.get_services()
-        svc = next((s for s in services if s.uuid.lower() == self._service_uuid), None)
-        if not svc:
-            await client.disconnect()
-            raise RuntimeError("SPIKE App 3 service not found")
-
-        # exact UUIDs; fallback by properties if needed
-        rx = next((c for c in svc.characteristics if c.uuid.lower() == UUID.RX.lower()), None)
-        tx = next((c for c in svc.characteristics if c.uuid.lower() == UUID.TX.lower()), None)
-        if not rx or not tx:
-            rx = tx = None
-            for ch in svc.characteristics:
-                p = set(ch.properties or [])
-                if not tx and "notify" in p:
-                    tx = ch
-                if not rx and ("write" in p or "write-without-response" in p):
-                    rx = ch
-        if not rx or not tx:
-            await client.disconnect()
-            raise RuntimeError("RX/TX characteristics not found")
-
-        self._rx_uuid, self._tx_uuid = rx.uuid, tx.uuid
-        self._rx_props = set(rx.properties or [])
-        if ("write" not in self._rx_props) and ("write-without-response" not in self._rx_props):
-            await client.disconnect()
-            raise RuntimeError("Mapped RX not writable")
-        if "notify" not in set(tx.properties or []):
-            await client.disconnect()
-            raise RuntimeError("Mapped TX not notifiable")
+        await self._resolve_uuids(client)
 
         await client.start_notify(self._tx_uuid, self._on_notify)
         self._notify_started = True
-        await asyncio.sleep(0.3)  # allow CCCD to settle on Windows
-
+        await asyncio.sleep(0.3)  # allow CCCD to settle on some stacks
         self.client = client
+
+        print(f"Connected to Spike({target})")
         return client
 
     async def disconnect(self):
-        if self.client:
-            try:
-                if self._notify_started and self._tx_uuid:
-                    try:
-                        await self.client.stop_notify(self._tx_uuid)
-                    except Exception:
-                        pass
-                if self.client.is_connected:
-                    await self.client.disconnect()
-            finally:
-                self.client = None
-                self._notify_started = False
-                self._inbuf.clear()
-                while not self._queue.empty():
-                    try:
-                        self._queue.get_nowait()
-                        self._queue.task_done()
-                    except Exception:
-                        break
-                if self._pending and not self._pending[1].done():
-                    self._pending[1].cancel()
-                self._pending = None
+        if not self.client:
+            return
+        try:
+            if self._notify_started and self._tx_uuid:
+                try:
+                    await self.client.stop_notify(self._tx_uuid)
+                except Exception:
+                    pass
+            if self.client.is_connected:
+                await self.client.disconnect()
+        finally:
+            self.client = None
+            self._notify_started = False
+            self._inbuf.clear()
+            while not self._queue.empty():
+                try:
+                    self._queue.get_nowait()
+                    self._queue.task_done()
+                except Exception:
+                    break
+            if self._pending and not self._pending[1].done():
+                self._pending[1].cancel()
+            self._pending = None
 
     def __del__(self):
         if self.client and getattr(self.client, "is_connected", False):
@@ -176,17 +211,18 @@ class Hub:
                 return
         self._queue.put_nowait(msg)
 
-    # ---- I/O ----
+    # ---- write/read ----
 
     async def _write_frame(self, frame: bytes):
         if not self.client or not self.client.is_connected or not self._rx_uuid:
             raise RuntimeError("Not connected")
-        if ("write" not in self._rx_props) and ("write-without-response" not in self._rx_props):
+        if not ({"write", "write-without-response"} & self._rx_props):
             raise RuntimeError("Current RX not writable")
+
         packet_size = getattr(self.info, "max_packet_size", None) or len(frame)
         use_resp = "write" in self._rx_props
         for off in range(0, len(frame), packet_size):
-            chunk = frame[off:off + packet_size]
+            chunk = frame[off: off + packet_size]
             await self.client.write_gatt_char(self._rx_uuid, chunk, response=use_resp)
 
     async def send_message(self, message: BaseMessage) -> None:
@@ -243,7 +279,7 @@ class Hub:
         )
         running = 0
         for off in range(0, len(data), max_chunk):
-            chunk = data[off:off + max_chunk]
+            chunk = data[off: off + max_chunk]
             running = crc(chunk, running)
             _ = await self.send_request(
                 TransferChunkRequest(running, chunk),
