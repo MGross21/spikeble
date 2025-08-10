@@ -1,4 +1,4 @@
-# Lego Spike
+# SpikeBLE <sub>(pronounced "spike-able")</sub>
 
 BLE interface for running MicroPython on LEGO® SPIKE™ devices.  
 
@@ -6,11 +6,12 @@ BLE interface for running MicroPython on LEGO® SPIKE™ devices.
 
 ## Installation
 
-Clone the repository and navigate to the project directory:
+To install the package, clone the repository and install it using pip:
 
 ```bash
 git clone https://github.com/MGross21/lego-spike
-pip install lego-spike
+cd lego-spike
+pip install .
 ```
 
 ## Documentation

@@ -24,9 +24,9 @@ dependencies = ["bleak>=1.0.0"]
 dynamic = ["version"]
 
 [project.urls]
-Homepage = "https://github.com/MGross21/lego-spike"
-Repository = "https://github.com/MGross21/lego-spike"
-Issues = "https://github.com/MGross21/lego-spike/issues"
+Homepage = "https://github.com/MGross21/spikeble"
+Repository = "https://github.com/MGross21/spikeble"
+Issues = "https://github.com/MGross21/spikeble/issues"
 
 [tool.hatch.version]
 source = "vcs"
@@ -34,10 +34,10 @@ fallback-version = "0.0.0"
 raw-options = { local_scheme = "no-local-version" }
 
 [tool.hatch.build.targets.wheel]
-packages = ["spike"]
+packages = ["spikeble"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/spike", "/README.md", "/LICENSE*", "/pyproject.toml"]
+include = ["/spikeble", "/README.md", "/LICENSE*", "/pyproject.toml"]
 
 # ---- Tooling ---------------------------------------------------------------
 
