@@ -1,20 +1,22 @@
-# lego-spike
-Python library for LEGO Spike Platform
+# Lego Spike
 
-## Virtual Env. Install
+A Python library for the LEGO® Spike™ platform.
+
+![Lego Spike](assets/lego_spike.png)
+
+## Installation
+
+Create and activate a virtual environment, then install dependencies:
 
 ```bash
-python -m venv .venv \
-&& source .venv/bin/activate \
-&& pip install --upgrade pip --quiet \
-pip install -r requirements.txt --quiet
+python -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-## Reference Docs
+## Documentation
 
-1. [GitHub](https://github.com/LEGO/spike-prime-docs)
-2. [Docs](https://lego.github.io/spike-prime-docs)
-
-### External
-
-[Spike 3](https://tuftsceeo.github.io/SPIKEPythonDocs/SPIKE3.html)
+- [Official GitHub Docs](https://github.com/LEGO/spike-prime-docs)
+- [API Reference](https://lego.github.io/spike-prime-docs)
+- [Spike 3 Python Docs (Unofficial)](https://tuftsceeo.github.io/SPIKEPythonDocs/SPIKE3.html)
