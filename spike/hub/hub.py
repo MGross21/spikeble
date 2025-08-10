@@ -1,10 +1,12 @@
+from __future__ import annotations
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# hub.py
 import asyncio
 import warnings
+import textwrap
+import inspect
 from typing import Optional, Type, TypeVar
 
 from bleak import BleakScanner, BleakClient
@@ -84,23 +86,33 @@ class Hub:
             return dev
 
         # Fallback: full discovery
-        for d in await BleakScanner.discover(timeout=self.timeout):
+        devices = await BleakScanner.discover(timeout=self.timeout)
+        for d in devices:
             name = (getattr(d, "name", "") or "").lower()
             if any(h in name for h in self.NAME_HINTS):
                 return d
         raise RuntimeError("No SPIKE hub found")
 
     async def _resolve_uuids(self, client: BleakClient):
-        """Map actual RX/TX by exact UUIDs or, failing that, by properties."""
-        services = client.services if hasattr(client, "services") else await client.get_services()
+        # Modern Bleak: services are available after connection
+        services = client.services
+        if services is None:
+            raise RuntimeError("GATT services not available from Bleak client")
 
-        svc = next((s for s in services if s.uuid.lower() in self.SERVICE_UUIDS), None)
+        # Strict: prefer the known FD02 service
+        svc = None
+        for s in services:
+            if s.uuid.lower() in self.SERVICE_UUIDS:
+                svc = s
+                break
+        
         if not svc:
-            # try any service that contains both notify and write chars
+            # Fallback: pick a service that has at least one notifiable and one writable characteristic
             candidate = None
             for s in services:
-                has_notify = any("notify" in set(c.properties or []) for c in s.characteristics)
-                has_write = any({"write", "write-without-response"} & set(c.properties or []) for c in s.characteristics)
+                has_notify = any("notify" in c.properties for c in s.characteristics)
+                has_write = any(prop in c.properties for prop in ["write", "write-without-response"] 
+                               for c in s.characteristics)
                 if has_notify and has_write:
                     candidate = s
                     break
@@ -109,25 +121,33 @@ class Hub:
             svc = candidate
 
         # Try exact UUIDs first
-        rx = next((c for c in svc.characteristics if c.uuid.lower() in self.RX_UUIDS), None)
-        tx = next((c for c in svc.characteristics if c.uuid.lower() in self.TX_UUIDS), None)
+        rx = None
+        tx = None
+        for c in svc.characteristics:
+            if c.uuid.lower() in self.RX_UUIDS:
+                rx = c
+            if c.uuid.lower() in self.TX_UUIDS:
+                tx = c
 
-        # Fallback: by properties
+        # Fallback by properties, enforce distinct chars
         if not rx or not tx:
             for ch in svc.characteristics:
-                props = set(ch.properties or [])
+                props = ch.properties
                 if not tx and "notify" in props:
                     tx = ch
-                if not rx and ({"write", "write-without-response"} & props):
-                    rx = ch
+                if not rx and any(prop in props for prop in ["write", "write-without-response"]):
+                    if not tx or ch.uuid != tx.uuid:
+                        rx = ch
 
         if not rx or not tx:
             raise RuntimeError("RX/TX characteristics not found")
+        if rx.uuid == tx.uuid:
+            raise RuntimeError("Resolved RX and TX to the same characteristic")
 
-        rx_props = set(rx.properties or [])
-        if not ({"write", "write-without-response"} & rx_props):
+        rx_props = set(rx.properties)
+        if not any(prop in rx_props for prop in ["write", "write-without-response"]):
             raise RuntimeError("Mapped RX not writable")
-        if "notify" not in set(tx.properties or []):
+        if "notify" not in tx.properties:
             raise RuntimeError("Mapped TX not notifiable")
 
         self._service_uuid = svc.uuid
@@ -146,14 +166,16 @@ class Hub:
         if not client.is_connected:
             raise RuntimeError("Bluetooth connect failed")
 
+        # Modern Bleak automatically discovers services on connection
+        # No need to explicitly call get_services()
+
         await self._resolve_uuids(client)
 
         await client.start_notify(self._tx_uuid, self._on_notify)
         self._notify_started = True
         await asyncio.sleep(0.3)  # allow CCCD to settle on some stacks
-        self.client = client
 
-        print(f"Connected to Spike({target})")
+        self.client = client
         return client
 
     async def disconnect(self):
@@ -187,7 +209,8 @@ class Hub:
 
     # ---- notify path ----
 
-    def _on_notify(self, _handle: int, data: bytes):
+    def _on_notify(self, _sender, data: bytes):
+        """Handle notification callback. Modern Bleak passes sender instead of handle."""
         self._inbuf.extend(data)
         while True:
             try:
@@ -216,7 +239,7 @@ class Hub:
     async def _write_frame(self, frame: bytes):
         if not self.client or not self.client.is_connected or not self._rx_uuid:
             raise RuntimeError("Not connected")
-        if not ({"write", "write-without-response"} & self._rx_props):
+        if not any(prop in self._rx_props for prop in ["write", "write-without-response"]):
             raise RuntimeError("Current RX not writable")
 
         packet_size = getattr(self.info, "max_packet_size", None) or len(frame)
@@ -287,6 +310,162 @@ class Hub:
                 timeout=10.0,
             )
         _ = await self.start_program(slot)
+    
+    # ---- convenience runners ----
+    
+    async def run_source(self, *, slot: int, name: str = "main.py", source: str,
+                         follow_seconds: Optional[float] = None) -> None:
+        """Run Python source code on the hub with optimized execution flow.
+        
+        Args:
+            slot: Program slot number (0-19)
+            name: Program name (default: "main.py")
+            source: Python source code to execute
+            follow_seconds: Time to monitor output (None = no monitoring)
+        """
+        data = source.encode("utf-8")
+        
+        # Batch operations for efficiency
+        await self.clear_slot(slot)
+        await self.upload_program(slot=slot, name=name, data=data)
+        
+        if follow_seconds is not None:
+            await self._follow_execution(follow_seconds)
+
+    async def run_file(self, *, slot: int, path: str, name: Optional[str] = None,
+                       follow_seconds: Optional[float] = None) -> None:
+        """Run Python file on the hub with optimized file handling.
+        
+        Args:
+            slot: Program slot number (0-19)  
+            path: Path to Python file
+            name: Program name (default: basename of path)
+            follow_seconds: Time to monitor output (None = no monitoring)
+        """
+        # Read file efficiently
+        try:
+            with open(path, "rb") as f:
+                data = f.read()
+        except IOError as e:
+            raise RuntimeError(f"Failed to read file {path}: {e}") from e
+        
+        program_name = name or os.path.basename(path)
+        
+        # Batch operations for efficiency
+        await self.clear_slot(slot)
+        await self.upload_program(slot=slot, name=program_name, data=data)
+        
+        if follow_seconds is not None:
+            await self._follow_execution(follow_seconds)
+
+    async def run_func(self, *, slot: int, fn: Callable[[], Any], name: str = "main.py",
+                       follow_seconds: Optional[float] = None) -> None:
+        """Run Python function on the hub with optimized source extraction.
+        
+        Args:
+            slot: Program slot number (0-19)
+            fn: Python function to execute (must be callable with no args)
+            name: Program name (default: "main.py") 
+            follow_seconds: Time to monitor output (None = no monitoring)
+        """
+        try:
+            # Extract and prepare source code
+            src = textwrap.dedent(inspect.getsource(fn))
+            entry = f"\nif __name__ == '__main__':\n    {fn.__name__}()\n"
+            complete_source = src + entry
+        except OSError as e:
+            raise RuntimeError(f"Failed to extract source for function {fn.__name__}: {e}") from e
+        
+        await self.run_source(slot=slot, name=name, source=complete_source,
+                              follow_seconds=follow_seconds)
+
+    async def _follow_execution(self, follow_seconds: float) -> None:
+        """Optimized execution monitoring with precise timing."""
+        # Enable notifications once
+        try:
+            await self.enable_notifications(50)
+        except Exception as e:
+            print(f"Warning: Could not enable notifications: {e}")
+            return
+        
+        # Use high-precision timing
+        end_time = asyncio.get_event_loop().time() + follow_seconds
+        
+        try:
+            while True:
+                remaining = end_time - asyncio.get_event_loop().time()
+                if remaining <= 0:
+                    break
+                
+                try:
+                    msg = await self.recv(timeout=min(remaining, 1.0))  # Cap individual waits
+                    print(msg)
+                except asyncio.TimeoutError:
+                    # Check if we've exceeded total time
+                    if asyncio.get_event_loop().time() >= end_time:
+                        break
+                    continue
+                except Exception as e:
+                    print(f"Error receiving message: {e}")
+                    break
+        except KeyboardInterrupt:
+            print("\nMonitoring interrupted by user")
+        except Exception as e:
+            print(f"Error during execution monitoring: {e}")
+
+    async def run_and_wait(self, *, slot: int, source: str, name: str = "main.py", 
+                          timeout: float = 30.0) -> list[BaseMessage]:
+        """Run code and collect all output messages until completion.
+        
+        Args:
+            slot: Program slot number (0-19)
+            source: Python source code
+            name: Program name
+            timeout: Maximum time to wait for completion
+            
+        Returns:
+            List of all messages received during execution
+        """
+        messages = []
+        data = source.encode("utf-8")
+        
+        # Prepare execution
+        await self.clear_slot(slot)
+        await self.enable_notifications(50)  # Enable before upload
+        await self.upload_program(slot=slot, name=name, data=data)
+        
+        # Collect messages with timeout
+        end_time = asyncio.get_event_loop().time() + timeout
+        no_message_timeout = 2.0  # Stop if no message for 2 seconds
+        last_message_time = asyncio.get_event_loop().time()
+        
+        try:
+            while True:
+                now = asyncio.get_event_loop().time()
+                remaining = end_time - now
+                no_msg_remaining = last_message_time + no_message_timeout - now
+                
+                if remaining <= 0:
+                    break
+                
+                wait_time = min(remaining, max(0.1, no_msg_remaining))
+                
+                try:
+                    msg = await self.recv(timeout=wait_time)
+                    messages.append(msg)
+                    last_message_time = now
+                except asyncio.TimeoutError:
+                    # Check if we should stop due to no messages
+                    if now >= last_message_time + no_message_timeout:
+                        break
+                    if remaining <= 0:
+                        break
+                    continue
+                        
+        except Exception as e:
+            print(f"Error during execution: {e}")
+        
+        return messages
 
 
 # minimal demo
