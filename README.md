@@ -10,18 +10,7 @@ Clone the repository and navigate to the project directory:
 
 ```bash
 git clone https://github.com/MGross21/lego-spike
-cd lego-spike
-```
-
-## Setting Up a Python Virtual Environment
-
-Create and activate a virtual environment, then install the required dependencies:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
-pip install --upgrade pip
-pip install -r requirements.txt
+pip install lego-spike
 ```
 
 ## Documentation
