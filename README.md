@@ -14,3 +14,7 @@ pip install -r requirements.txt --quiet
 
 1. [GitHub](https://github.com/LEGO/spike-prime-docs)
 2. [Docs](https://lego.github.io/spike-prime-docs)
+
+### External
+
+[Spike 3](https://tuftsceeo.github.io/SPIKEPythonDocs/SPIKE3.html)
