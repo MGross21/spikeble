@@ -8,10 +8,10 @@ from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 from bleak.backends.characteristic import BleakGATTCharacteristic
 
-from lib.connection import UUID
-from lib import cobs
-from lib.crc import crc
-from lib.messages import *  # BaseMessage, InfoRequest, InfoResponse, etc.
+from .lib.connection import UUID
+from .lib import cobs
+from .lib.crc import crc
+from .lib.messages import *  # BaseMessage, InfoRequest, InfoResponse, etc.
 
 TM = TypeVar("TM", bound="BaseMessage")
 
@@ -38,7 +38,7 @@ class Spike:
 
         self._stop = asyncio.Event()
         self._info: Optional[InfoResponse] = None
-        self._pending: Tuple[int, asyncio.Future] = (-1, asyncio.get_event_loop().create_future())
+        self._pending: Tuple[int, asyncio.Future] = (-1, asyncio.Future())
         self._notify_cb: Optional[Callable[[DeviceNotification], Awaitable[None] | None]] = None
 
     async def connect(self) -> None:
@@ -52,14 +52,29 @@ class Spike:
         logger.info("Connecting to SPIKE hub...")
         self._client = BleakClient(self._device, disconnected_callback=self._on_disconnect)
         await self._client.connect()
-        await self._client.get_services()
 
-        self._service = self._client.services.get_service(UUID.SERVICE)
-        self._rx = self._service.get_characteristic(UUID.RX)
-        self._tx = self._service.get_characteristic(UUID.TX)
+        # Some Bleak builds don’t have get_services(); services are available post-connect.
+        # If your build does have it, calling it is harmless. Guard with hasattr.
+        if hasattr(self._client, "get_services"):
+            try:
+                await getattr(self._client, "get_services")()  # no-op on some backends
+            except TypeError:
+                # Older signatures or property-only; ignore
+                pass
+
+        svc = self._client.services.get_service(UUID.SERVICE)
+        if svc is None:
+            raise RuntimeError("SPIKE service not found on the connected device")
+
+        self._service = svc
+        self._rx = svc.get_characteristic(UUID.RX)
+        self._tx = svc.get_characteristic(UUID.TX)
+        if not self._rx or not self._tx:
+            raise RuntimeError("SPIKE RX/TX characteristics not found")
 
         await self._client.start_notify(self._tx, self._on_data)
         logger.info("Connected to SPIKE hub")
+
 
     async def disconnect(self) -> None:
         if self._client and self._client.is_connected:
