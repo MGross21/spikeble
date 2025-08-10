@@ -1,8 +1,13 @@
-# SpikeBLE <sub>(pronounced "spike-able")</sub>
+<h1 align="center">
+    <img src="https://raw.githubusercontent.com/MGross21/spikeble/main/assets/spikeble_logo.png" alt="spikeble logo" width="120" />
+</h1>
+<p align="center">
+    <sub>(pronounced "spike-able")</sub>
+</p>
 
 BLE interface for running MicroPython on LEGO® SPIKE™ devices.  
 
-![Lego Spike](assets/lego_spike.png)
+![Lego Spike](https://raw.githubusercontent.com/MGross21/spikeble/main/assets/lego_spike.png)
 
 ## Installation
 
