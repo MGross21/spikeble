@@ -1,11 +1,14 @@
-import os
+# Add package link
+from pathlib import Path
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, str(Path(__file__).parent.parent / "spike"))
 
+# Main Code
 import asyncio
+import os
 from pathlib import Path
-from spike.spike import run
+from spike import run
 
 PROGRAM = Path(os.path.join(os.path.dirname(__file__), "__test.py")).read_bytes()
 
