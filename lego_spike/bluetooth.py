@@ -13,6 +13,13 @@ class Bluetooth:
     """
     Manages Bluetooth connections using Bleak.
     """
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        """Ensure only one instance of Bluetooth exists."""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
     def __init__(self, timeout=10):
         self.timeout = timeout
