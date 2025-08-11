@@ -1,4 +1,5 @@
 import spikeble
+import asyncio
 
 
 def main():
@@ -16,8 +17,9 @@ def main():
     import orientation
     import runloop
 
+
     ### Insert Your Code Here ###
 
 
 if __name__ == "__main__":
-    spikeble.run(main())
+    asyncio.run(spikeble.run(main))

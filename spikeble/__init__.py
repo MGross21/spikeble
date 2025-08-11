@@ -14,7 +14,7 @@ async def run_fn(
         program()
     except Exception as e:
         logger.error(f"Error occurred while running program: {e}")
-    await run_string(
+    await run_str(
         func_to_string(program),
         slot=slot,
         name=name,
@@ -24,26 +24,25 @@ async def run_fn(
 run = run_fn # shorthand alias default
 
 async def run_file(
-    program: Callable,
+    program_path: str,
     *,
     slot: int = 0,
-    name: str = "program.py",
     stay_connected: bool = False,
 ):
     from .spike import logger
     from ._utils import func_to_string
     from pathlib import Path
-    if not Path(name).exists():
-        logger.error(f"File not found: {name}")
+    if not Path(program_path).exists():
+        logger.error(f"File not found: {program_path}")
         return
-    await run_string(
-        Path(name).read_bytes(),
+    await run_str(
+        Path(program_path).read_bytes(),
         slot=slot,
-        name=name,
+        name=Path(program_path).name,
         stay_connected=stay_connected
     )
 
-async def run_string(
+async def run_str(
     program_str: str,
     *,
     slot: int = 0,

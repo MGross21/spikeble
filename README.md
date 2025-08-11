@@ -63,6 +63,18 @@ if __name__ == "__main__":
     asyncio.run(spikeble.run(main))
 ```
 
+### Other Send Methods
+
+You can also run code on the SPIKE using the following methods:
+
+```python
+... spikeble.run_file("path/to/your_script.py") ...
+```
+
+```python
+... spikeble.run_str("print('Hello from SPIKE!')") ...
+```
+
 ## Documentation
 
 <!-- - [GitHub Docs](https://github.com/LEGO/spike-prime-docs) -->
