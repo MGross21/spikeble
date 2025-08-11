@@ -211,6 +211,10 @@ class Spike:
     
     @staticmethod
     async def run(program: Callable, slot: int = 0, name: str = "program.py", stay_connected: bool = False):
+        try:
+            program()
+        except Exception as e:
+            logger.error(f"Error occurred while running program: {e}")
         from ._utils import func_to_string
         program_str = func_to_string(program)
         async with Spike(timeout=10, slot=slot) as hub:
