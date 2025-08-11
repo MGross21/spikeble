@@ -9,6 +9,8 @@ All functions in the module should be called inside the force_sensor module as a
 
 >>> force_sensor.force(port.A)
 """
+
+
 async def force(port: int) -> int:
     """
     Retrieves the measured force in decinewtons (0 to 100).
@@ -26,6 +28,7 @@ async def force(port: int) -> int:
     """
     assert port in range(6), "Invalid port"
 
+
 async def pressed(port: int) -> bool:
     """
     Tests whether the button on the sensor is pressed. Returns true if the force sensor connected to port is pressed.
@@ -42,6 +45,7 @@ async def pressed(port: int) -> bool:
         A port from the `port` submodule in the hub module.
     """
     assert port in range(6), "Invalid port"
+
 
 async def raw(port: int) -> int:
     """

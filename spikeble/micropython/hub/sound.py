@@ -18,7 +18,20 @@ WAVEFORM_SAWTOOTH = 3
 WAVEFORM_SQUARE = 2
 WAVEFORM_TRIANGLE = 1
 
-async def beep(freq: int = 440, duration: int = 500, volume: int = 100, *, attack: int = 0, decay: int = 0, sustain: int = 100, release: int = 0, transition: int = 10, waveform: int = WAVEFORM_SINE, channel: int = DEFAULT) -> Awaitable:
+
+async def beep(
+    freq: int = 440,
+    duration: int = 500,
+    volume: int = 100,
+    *,
+    attack: int = 0,
+    decay: int = 0,
+    sustain: int = 100,
+    release: int = 0,
+    transition: int = 10,
+    waveform: int = WAVEFORM_SINE,
+    channel: int = DEFAULT,
+) -> Awaitable:
     """
     Plays a beep sound from the hub
 
@@ -46,9 +59,11 @@ async def beep(freq: int = 440, duration: int = 500, volume: int = 100, *, attac
     """
     pass
 
+
 def stop() -> None:
     """Stops all noise from the hub"""
     pass
+
 
 def volume(volume: int) -> None:
     """

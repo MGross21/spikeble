@@ -78,6 +78,7 @@ IMAGE_SKULL = 65
 IMAGE_UMBRELLA = 66
 IMAGE_SNAKE = 67
 
+
 def clear() -> None:
     """
     Switches off all of the pixels on the Light Matrix.
@@ -89,18 +90,19 @@ def clear() -> None:
     from hub import light_matrix
     import time
     # Update pixels to show an image on Light Matrix, and then turn them off using the clear function
-    
-    # Show a small heart 
+
+    # Show a small heart
     light_matrix.show_image(2)
-    
-    # Wait for two seconds 
+
+    # Wait for two seconds
     time.sleep_ms(2000)
-    
-    # Switch off the heart 
+
+    # Switch off the heart
     light_matrix.clear()
     ```
     """
     pass
+
 
 def get_orientation() -> int:
     """
@@ -108,6 +110,7 @@ def get_orientation() -> int:
     Can be used with the following constants: `orientation.UP`, `orientation.LEFT`, `orientation.RIGHT`, `orientation.DOWN`
     """
     pass
+
 
 def get_pixel(x: int, y: int) -> int:
     """
@@ -119,10 +122,10 @@ def get_pixel(x: int, y: int) -> int:
 
     from hub import light_matrix
 
-    # Show a heart 
+    # Show a heart
     light_matrix.show_image(1)
 
-    # Print the value of the center pixel's intensity 
+    # Print the value of the center pixel's intensity
     print(light_matrix.get_pixel(2, 2))
     ```
 
@@ -136,30 +139,32 @@ def get_pixel(x: int, y: int) -> int:
     """
     pass
 
+
 def set_orientation(top: int) -> int:
     """
-    Change the orientation of the Light Matrix. All subsequent calls will use the new orientation.
-Can be used with the following constants: `orientation.UP`, `orientation.LEFT`, `orientation.RIGHT`, `orientation.DOWN`
+        Change the orientation of the Light Matrix. All subsequent calls will use the new orientation.
+    Can be used with the following constants: `orientation.UP`, `orientation.LEFT`, `orientation.RIGHT`, `orientation.DOWN`
 
-    Parameters
-    ----------
-    top : int
-        The side of the hub to be the top
+        Parameters
+        ----------
+        top : int
+            The side of the hub to be the top
     """
     pass
+
 
 def set_pixel(x: int, y: int, intensity: int) -> None:
     """
     Sets the brightness of one pixel (one of the 25 LEDs) on the Light Matrix.
-    
+
     Example
     -------
     ```python
     from hub import light_matrix
-    # Turn on the pixel in the center of the hub 
+    # Turn on the pixel in the center of the hub
     light_matrix.set_pixel(2, 2, 100)
     ```
-    
+
     Parameters
     ----------
     x : int
@@ -171,6 +176,7 @@ def set_pixel(x: int, y: int, intensity: int) -> None:
     """
     pass
 
+
 def show(pixels: list[int]) -> None:
     """
     Change all the lights at the same time.
@@ -179,12 +185,12 @@ def show(pixels: list[int]) -> None:
     -------
     ```python
     from hub import light_matrix
-    # Update all pixels on Light Matrix using the show function 
+    # Update all pixels on Light Matrix using the show function
 
-    # Create a list with 25 identical intensity values 
-    pixels = [100] * 25 
+    # Create a list with 25 identical intensity values
+    pixels = [100] * 25
 
-    # Update all pixels to show same intensity 
+    # Update all pixels to show same intensity
     light_matrix.show(pixels)
     ```
 
@@ -195,17 +201,18 @@ def show(pixels: list[int]) -> None:
     """
     pass
 
+
 def show_image(image: int) -> None:
     """
     Display one of the built in images on the display.
-    
+
     Example
     -------
     ```python
     from hub import light_matrix
-    # Update pixels to show an image on Light Matrix using the show_image function 
+    # Update pixels to show an image on Light Matrix using the show_image function
 
-    # Show a smiling face 
+    # Show a smiling face
     light_matrix.show_image(light_matrix.IMAGE_HAPPY)
     ```
 
@@ -216,10 +223,13 @@ def show_image(image: int) -> None:
     """
     pass
 
-async def write(text: str, intensity: int = 100, time_per_character: int = 500) -> Awaitable:
+
+async def write(
+    text: str, intensity: int = 100, time_per_character: int = 500
+) -> Awaitable:
     """
     Displays text on the Light Matrix, one letter at a time, scrolling from right to left except if there is a single character to show which will not scroll
-    
+
     Example
     -------
     ```python

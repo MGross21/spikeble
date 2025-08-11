@@ -15,6 +15,7 @@ POWER = 0
 CONNECT = 1
 """The light around the Bluetooth connect button on SPIKE Prime."""
 
+
 def color(light: int, color: int) -> None:
     """
     Change the color of a light on the hub.

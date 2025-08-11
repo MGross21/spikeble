@@ -17,6 +17,7 @@ LEFT = 1
 RIGHT = 2
 """Right button next to the power button on the SPIKE Prime hub"""
 
+
 def pressed(button: int) -> int:
     """
     ```python
@@ -26,11 +27,11 @@ def pressed(button: int) -> int:
     # Wait for the left button to be pressed
     while not button.pressed(button.LEFT):
         pass
-    
+
     # As long as the left button is being pressed, update the `left_button_press_duration` variable
     while button.pressed(button.LEFT):
         left_button_press_duration = button.pressed(button.LEFT)
-    
+
     print("Left button was pressed for " + str(left_button_press_duration) + " milliseconds")
     ```
     """

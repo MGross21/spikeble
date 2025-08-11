@@ -21,6 +21,7 @@ BACK = 4
 LEFT = 5
 """The left side of the SPIKE Prime hub when facing the front hub face."""
 
+
 def acceleration(raw_unfiltered: bool) -> tuple[int, int, int]:
     """
     Returns a tuple containing x, y & z acceleration values as integers. The values are mili G, so 1 / 1000 G
@@ -31,6 +32,7 @@ def acceleration(raw_unfiltered: bool) -> tuple[int, int, int]:
         If we want the data back raw and unfiltered
     """
     pass
+
 
 def angular_velocity(raw_unfiltered: bool) -> tuple[int, int, int]:
     """
@@ -43,10 +45,11 @@ def angular_velocity(raw_unfiltered: bool) -> tuple[int, int, int]:
     """
     pass
 
+
 def gesture() -> int:
     """
     Returns the gesture recognized.
-    
+
     Possible values are:
     - `motion_sensor.TAPPED`
     - `motion_sensor.DOUBLE_TAPPED`
@@ -55,6 +58,7 @@ def gesture() -> int:
     - `motion_sensor.UNKNOWN`
     """
     pass
+
 
 def get_yaw_face() -> int:
     """
@@ -75,17 +79,21 @@ def get_yaw_face() -> int:
     """
     pass
 
+
 def quaternion() -> tuple[float, float, float, float]:
     """Returns the hub orientation quaternion as a tuple[w: float, x: float, y: float, z: float]."""
     pass
+
 
 def reset_tap_count() -> None:
     """Reset the tap count returned by the `tap_count` function."""
     pass
 
+
 def reset_yaw(angle: int) -> None:
     """Change the yaw angle offset. The angle set will be the new yaw value."""
     pass
+
 
 def set_yaw_face(up: int) -> bool:
     """
@@ -107,17 +115,21 @@ def set_yaw_face(up: int) -> bool:
     """
     pass
 
+
 def stable() -> bool:
     """Whether or not the hub is resting flat."""
     pass
+
 
 def tap_count() -> int:
     """Returns the number of taps recognized since the program started or last time `motion_sensor.reset_tap_count()` was called."""
     pass
 
+
 def tilt_angles() -> tuple[int, int, int]:
     """Returns a tuple containing yaw pitch and roll values as integers. Values are decidegrees"""
     pass
+
 
 def up_face() -> int:
     """

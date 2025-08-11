@@ -41,8 +41,11 @@ INSTRUMENT_MARIMBA = 19
 INSTRUMENT_SYNTH_LEAD = 20
 INSTRUMENT_SYNTH_PAD = 21
 
+
 def play_drum(drum: int) -> None:
     assert 1 <= drum <= 18, "Drum must be between 1 and 18"
+
+
 def play_instrument(instrument: int, note: int, duration: int) -> None:
     assert 1 <= instrument <= 21, "Instrument must be between 1 and 21"
     assert 1 <= note <= 130, "Note must be between 1 and 130"

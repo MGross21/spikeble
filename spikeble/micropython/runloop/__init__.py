@@ -13,6 +13,7 @@ All functions in the module should be called inside the `runloop` module as a pr
 
 from typing import Awaitable, Callable
 
+
 def run(*functions: Awaitable) -> None:
     """
     Start any number of parallel `async` functions. This is the function you should use to create programs with a similar structure to Word Blocks.
@@ -23,6 +24,7 @@ def run(*functions: Awaitable) -> None:
         The functions to run
     """
     pass
+
 
 async def sleep_ms(duration: int) -> Awaitable:
     """
@@ -36,7 +38,7 @@ async def sleep_ms(duration: int) -> Awaitable:
 
     async def main():
         light_matrix.write("Hi!")
-        # Wait for ten seconds 
+        # Wait for ten seconds
         await runloop.sleep_ms(10000)
         light_matrix.write("Are you still here?")
 
@@ -50,10 +52,11 @@ async def sleep_ms(duration: int) -> Awaitable:
     """
     pass
 
+
 async def until(function: Callable[[], bool], timeout: int = 0) -> Awaitable:
     """
     Returns an awaitable that will return when the condition in the function or lambda passed is `True` or when it times out
-    
+
     Example
     -------
     ```python
@@ -66,7 +69,7 @@ async def until(function: Callable[[], bool], timeout: int = 0) -> Awaitable:
         return color_sensor.color(port.A) is color.RED
 
     async def main():
-        # Wait until Color Sensor sees red 
+        # Wait until Color Sensor sees red
         await runloop.until(is_color_red)
         print("Red!")
 

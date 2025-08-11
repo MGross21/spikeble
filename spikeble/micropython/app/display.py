@@ -22,7 +22,18 @@ IMAGE_POLAR_BEAR = 19
 IMAGE_PARK = 20
 IMAGE_RANDOM = 21
 
-def hide() -> None: pass
-def image(image: int) -> None: assert 1 <= image <= 21, "Image must be between 1 and 21"
-def show(fullscreen: bool) -> None: pass
-def text(text: str) -> None: pass
+
+def hide() -> None:
+    pass
+
+
+def image(image: int) -> None:
+    assert 1 <= image <= 21, "Image must be between 1 and 21"
+
+
+def show(fullscreen: bool) -> None:
+    pass
+
+
+def text(text: str) -> None:
+    pass

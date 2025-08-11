@@ -18,7 +18,7 @@ TM = TypeVar("TM", bound="BaseMessage")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%H:%M:%S"
+    datefmt="%H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -39,32 +39,42 @@ class Spike:
         self._stop = asyncio.Event()
         self._info: Optional[InfoResponse] = None
         self._pending: Tuple[int, asyncio.Future] = (-1, asyncio.Future())
-        self._notify_cb: Optional[Callable[[DeviceNotification], Awaitable[None] | None]] = None
+        self._notify_cb: Optional[
+            Callable[[DeviceNotification], Awaitable[None] | None]
+        ] = None
 
     async def connect(self) -> None:
         self._device = await BleakScanner.find_device_by_filter(
             filterfunc=self._match_service, timeout=self.timeout
         )
         if self._device is None:
-            logger.error("No SPIKE hub found. Ensure power, range, and pairing state.")
+            logger.error(
+                "No SPIKE hub found. Ensure power, range, and pairing state."
+            )
             raise RuntimeError("No SPIKE hub found")
 
         logger.info("Connecting to SPIKE hub...")
-        self._client = BleakClient(self._device, disconnected_callback=self._on_disconnect)
+        self._client = BleakClient(
+            self._device, disconnected_callback=self._on_disconnect
+        )
         await self._client.connect()
 
         # Some Bleak builds don’t have get_services(); services are available post-connect.
         # If your build does have it, calling it is harmless. Guard with hasattr.
         if hasattr(self._client, "get_services"):
             try:
-                await getattr(self._client, "get_services")()  # no-op on some backends
+                await getattr(
+                    self._client, "get_services"
+                )()  # no-op on some backends
             except TypeError:
                 # Older signatures or property-only; ignore
                 pass
 
         svc = self._client.services.get_service(UUID.SERVICE)
         if svc is None:
-            raise RuntimeError("SPIKE service not found on the connected device")
+            raise RuntimeError(
+                "SPIKE service not found on the connected device"
+            )
 
         self._service = svc
         self._rx = svc.get_characteristic(UUID.RX)
@@ -74,7 +84,6 @@ class Spike:
 
         await self._client.start_notify(self._tx, self._on_data)
         logger.info("Connected to SPIKE hub")
-
 
     async def disconnect(self) -> None:
         if self._client and self._client.is_connected:
@@ -87,9 +96,13 @@ class Spike:
         logger.info(f"Hub info: {self._info}")
         return self._info
 
-    async def enable_notifications(self, interval_ms: int = DEVICE_NOTIFICATION_INTERVAL_MS) -> None:
+    async def enable_notifications(
+        self, interval_ms: int = DEVICE_NOTIFICATION_INTERVAL_MS
+    ) -> None:
         logger.info(f"Enabling device notifications every {interval_ms} ms")
-        resp = await self._send_request(DeviceNotificationRequest(interval_ms), DeviceNotificationResponse)
+        resp = await self._send_request(
+            DeviceNotificationRequest(interval_ms), DeviceNotificationResponse
+        )
         if not resp.success:
             logger.error("Failed to enable notifications")
             raise RuntimeError("Failed to enable notifications")
@@ -100,9 +113,16 @@ class Spike:
         logger.info(f"Clearing slot {s}")
         resp = await self._send_request(ClearSlotRequest(s), ClearSlotResponse)
         if not resp.success:
-            logger.warning(f"Slot {s} not acknowledged as cleared (may already be empty)")
+            logger.warning(
+                f"Slot {s} not acknowledged as cleared (may already be empty)"
+            )
 
-    async def upload_program(self, program: bytes, name: str = "program.py", slot: Optional[int] = None) -> None:
+    async def upload_program(
+        self,
+        program: bytes,
+        name: str = "program.py",
+        slot: Optional[int] = None,
+    ) -> None:
         s = self.slot if slot is None else slot
         info = self._require_info()
 
@@ -119,7 +139,9 @@ class Spike:
         for i in range(0, len(program), info.max_chunk_size):
             chunk = program[i : i + info.max_chunk_size]
             running_crc = crc(chunk, running_crc)
-            part = await self._send_request(TransferChunkRequest(running_crc, chunk), TransferChunkResponse)
+            part = await self._send_request(
+                TransferChunkRequest(running_crc, chunk), TransferChunkResponse
+            )
             if not part.success:
                 logger.error(f"Chunk transfer failed at offset {i}")
                 raise RuntimeError(f"Chunk transfer failed at offset {i}")
@@ -128,7 +150,9 @@ class Spike:
     async def start_program(self, slot: Optional[int] = None) -> None:
         s = self.slot if slot is None else slot
         logger.info(f"Starting program in slot {s}")
-        resp = await self._send_request(ProgramFlowRequest(stop=False, slot=s), ProgramFlowResponse)
+        resp = await self._send_request(
+            ProgramFlowRequest(stop=False, slot=s), ProgramFlowResponse
+        )
         if not resp.success:
             logger.error("Failed to start program")
             raise RuntimeError("Failed to start program")
@@ -138,7 +162,9 @@ class Spike:
         logger.info("Waiting until disconnect...")
         await self._stop.wait()
 
-    def on_device_notification(self, cb: Callable[[DeviceNotification], Awaitable[None] | None]) -> None:
+    def on_device_notification(
+        self, cb: Callable[[DeviceNotification], Awaitable[None] | None]
+    ) -> None:
         self._notify_cb = cb
 
     async def __aenter__(self) -> "Spike":
@@ -167,7 +193,9 @@ class Spike:
         packet_size = self._info.max_packet_size if self._info else len(frame)
 
         for i in range(0, len(frame), packet_size):
-            await self._client.write_gatt_char(self._rx, frame[i : i + packet_size], response=False)
+            await self._client.write_gatt_char(
+                self._rx, frame[i : i + packet_size], response=False
+            )
 
     async def _send_request(self, msg: BaseMessage, resp_t: Type[TM]) -> TM:
         loop = asyncio.get_event_loop()

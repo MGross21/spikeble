@@ -4,6 +4,7 @@ from __future__ import annotations
 from abc import ABC
 import struct
 
+
 class BaseMessage(ABC):
     @property
     def ID(cls) -> int:
@@ -21,6 +22,7 @@ class BaseMessage(ABC):
         plist = ", ".join(f"{k}={v}" for k, v in props.items())
         return f"{self.__class__.__name__}({plist})"
 
+
 def StatusResponse(name: str, id: int):
     class _StatusResponse(BaseMessage):
         ID = id
@@ -36,16 +38,29 @@ def StatusResponse(name: str, id: int):
     _StatusResponse.__name__ = name
     return _StatusResponse
 
+
 class InfoRequest(BaseMessage):
     ID = 0x00
-    def serialize(self): return b"\0"
+
+    def serialize(self):
+        return b"\0"
+
 
 class InfoResponse(BaseMessage):
     ID = 0x01
+
     def __init__(
-        self, rpc_major, rpc_minor, rpc_build,
-        firmware_major, firmware_minor, firmware_build,
-        max_packet_size, max_message_size, max_chunk_size, product_group_device
+        self,
+        rpc_major,
+        rpc_minor,
+        rpc_build,
+        firmware_major,
+        firmware_minor,
+        firmware_build,
+        max_packet_size,
+        max_message_size,
+        max_chunk_size,
+        product_group_device,
     ):
         self.rpc_major = rpc_major
         self.rpc_minor = rpc_minor
@@ -61,24 +76,48 @@ class InfoResponse(BaseMessage):
     @staticmethod
     def deserialize(data: bytes) -> InfoResponse:
         (
-            _, rpc_major, rpc_minor, rpc_build,
-            firmware_major, firmware_minor, firmware_build,
-            max_packet_size, max_message_size, max_chunk_size, product_group_device
+            _,
+            rpc_major,
+            rpc_minor,
+            rpc_build,
+            firmware_major,
+            firmware_minor,
+            firmware_build,
+            max_packet_size,
+            max_message_size,
+            max_chunk_size,
+            product_group_device,
         ) = struct.unpack("<BBBHBBHHHHH", data)
         return InfoResponse(
-            rpc_major, rpc_minor, rpc_build,
-            firmware_major, firmware_minor, firmware_build,
-            max_packet_size, max_message_size, max_chunk_size, product_group_device
+            rpc_major,
+            rpc_minor,
+            rpc_build,
+            firmware_major,
+            firmware_minor,
+            firmware_build,
+            max_packet_size,
+            max_message_size,
+            max_chunk_size,
+            product_group_device,
         )
+
 
 class ClearSlotRequest(BaseMessage):
     ID = 0x46
-    def __init__(self, slot: int): self.slot = slot
-    def serialize(self): return struct.pack("<BB", self.ID, self.slot)
+
+    def __init__(self, slot: int):
+        self.slot = slot
+
+    def serialize(self):
+        return struct.pack("<BB", self.ID, self.slot)
+
+
 ClearSlotResponse = StatusResponse("ClearSlotResponse", 0x47)
+
 
 class StartFileUploadRequest(BaseMessage):
     ID = 0x0C
+
     def __init__(self, file_name: str, slot: int, crc: int):
         self.file_name = file_name
         self.slot = slot
@@ -87,13 +126,19 @@ class StartFileUploadRequest(BaseMessage):
     def serialize(self):
         encoded_name = self.file_name.encode("utf8")
         if len(encoded_name) > 31:
-            raise ValueError(f"UTF-8 encoded file name too long: {len(encoded_name)} +1 >= 32")
-        fmt = f"<B{len(encoded_name)+1}sBI"
+            raise ValueError(
+                f"UTF-8 encoded file name too long: {len(encoded_name)} +1 >= 32"
+            )
+        fmt = f"<B{len(encoded_name) + 1}sBI"
         return struct.pack(fmt, self.ID, encoded_name, self.slot, self.crc)
+
+
 StartFileUploadResponse = StatusResponse("StartFileUploadResponse", 0x0D)
+
 
 class TransferChunkRequest(BaseMessage):
     ID = 0x10
+
     def __init__(self, running_crc: int, chunk: bytes):
         self.running_crc = running_crc
         self.size = len(chunk)
@@ -101,38 +146,65 @@ class TransferChunkRequest(BaseMessage):
 
     def serialize(self):
         fmt = f"<BIH{self.size}s"
-        return struct.pack(fmt, self.ID, self.running_crc, self.size, self.payload)
+        return struct.pack(
+            fmt, self.ID, self.running_crc, self.size, self.payload
+        )
+
+
 TransferChunkResponse = StatusResponse("TransferChunkResponse", 0x11)
+
 
 class ProgramFlowRequest(BaseMessage):
     ID = 0x1E
+
     def __init__(self, stop: bool, slot: int):
         self.stop = stop
         self.slot = slot
-    def serialize(self): return struct.pack("<BBB", self.ID, self.stop, self.slot)
+
+    def serialize(self):
+        return struct.pack("<BBB", self.ID, self.stop, self.slot)
+
+
 ProgramFlowResponse = StatusResponse("ProgramFlowResponse", 0x1F)
+
 
 class ProgramFlowNotification(BaseMessage):
     ID = 0x20
-    def __init__(self, stop: bool): self.stop = stop
+
+    def __init__(self, stop: bool):
+        self.stop = stop
+
     @staticmethod
     def deserialize(data: bytes) -> ProgramFlowNotification:
         _, stop = struct.unpack("<BB", data)
         return ProgramFlowNotification(bool(stop))
 
+
 class ConsoleNotification(BaseMessage):
     ID = 0x21
-    def __init__(self, text: str): self.text = text
+
+    def __init__(self, text: str):
+        self.text = text
+
     @staticmethod
     def deserialize(data: bytes) -> ConsoleNotification:
         text_bytes = data[1:].rstrip(b"\0")
         return ConsoleNotification(text_bytes.decode("utf8"))
-    def __str__(self): return f"{self.__class__.__name__}({self.text!r})"
+
+    def __str__(self):
+        return f"{self.__class__.__name__}({self.text!r})"
+
 
 class DeviceNotificationRequest(BaseMessage):
     ID = 0x28
-    def __init__(self, interval_ms: int): self.interval_ms = interval_ms
-    def serialize(self): return struct.pack("<BH", self.ID, self.interval_ms)
+
+    def __init__(self, interval_ms: int):
+        self.interval_ms = interval_ms
+
+    def serialize(self):
+        return struct.pack("<BH", self.ID, self.interval_ms)
+
+
 DeviceNotificationResponse = StatusResponse("DeviceNotificationResponse", 0x29)
 
 DEVICE_MESSAGE_MAP = {
@@ -146,8 +218,10 @@ DEVICE_MESSAGE_MAP = {
     0x0E: ("3x3", "<BB9B"),
 }
 
+
 class DeviceNotification(BaseMessage):
     ID = 0x3C
+
     def __init__(self, size: int, payload: bytes):
         self.size = size
         self._payload = payload
@@ -183,20 +257,31 @@ class DeviceNotification(BaseMessage):
             print(f"Unexpected size: {len(data)} != {size} + 3")
         return DeviceNotification(size, data[3:])
 
-    def __str__(self): return f"{self.__class__.__name__}({[x[0] for x in self.messages]})"
+    def __str__(self):
+        return f"{self.__class__.__name__}({[x[0] for x in self.messages]})"
+
 
 KNOWN_MESSAGES = {
-    M.ID: M for M in (
-        InfoRequest, InfoResponse,
-        ClearSlotRequest, ClearSlotResponse,
-        StartFileUploadRequest, StartFileUploadResponse,
-        TransferChunkRequest, TransferChunkResponse,
-        ProgramFlowRequest, ProgramFlowResponse,
-        ProgramFlowNotification, ConsoleNotification,
-        DeviceNotificationRequest, DeviceNotificationResponse,
+    M.ID: M
+    for M in (
+        InfoRequest,
+        InfoResponse,
+        ClearSlotRequest,
+        ClearSlotResponse,
+        StartFileUploadRequest,
+        StartFileUploadResponse,
+        TransferChunkRequest,
+        TransferChunkResponse,
+        ProgramFlowRequest,
+        ProgramFlowResponse,
+        ProgramFlowNotification,
+        ConsoleNotification,
+        DeviceNotificationRequest,
+        DeviceNotificationResponse,
         DeviceNotification,
     )
 }
+
 
 def deserialize(data: bytes):
     message_type = data[0]

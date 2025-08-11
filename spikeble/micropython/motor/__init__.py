@@ -29,16 +29,18 @@ COUNTERCLOCKWISE = 1
 SHORTEST_PATH = 2
 LONGEST_PATH = 3
 
+
 def absolute_position(port: int) -> int:
     """
     Get the absolute position of a Motor
-    
+
     Parameters
     ----------
     port : int
         A port from the `port` submodule in the `hub` module
     """
     assert port in range(6), "Invalid port"
+
 
 def get_duty_cycle(port: int) -> int:
     """
@@ -51,6 +53,7 @@ def get_duty_cycle(port: int) -> int:
     """
     assert port in range(6), "Invalid port"
 
+
 def relative_position(port: int) -> int:
     """
     Get the relative position of a Motor
@@ -61,6 +64,7 @@ def relative_position(port: int) -> int:
         A port from the `port` submodule in the `hub` module
     """
     assert port in range(6), "Invalid port"
+
 
 def reset_relative_position(port: int, position: int) -> None:
     """
@@ -76,6 +80,7 @@ def reset_relative_position(port: int, position: int) -> None:
     assert port in range(6), "Invalid port"
     assert isinstance(position, int), "Position must be an integer"
 
+
 def run(port: int, velocity: int, *, acceleration: int = 1000) -> None:
     """
     Start a Motor at a constant speed
@@ -86,7 +91,7 @@ def run(port: int, velocity: int, *, acceleration: int = 1000) -> None:
     from hub import port
     import motor, time
 
-    # Start motor 
+    # Start motor
     motor.run(port.A, 1000)
     ```
 
@@ -110,7 +115,16 @@ def run(port: int, velocity: int, *, acceleration: int = 1000) -> None:
     assert -10_000 <= velocity <= 10_000, "Invalid velocity"
     assert 1 <= acceleration <= 10_000, "Invalid acceleration"
 
-async def run_for_degrees(port: int, degrees: int, velocity: int, *, stop: int = BRAKE, acceleration: int = 1000, deceleration: int = 1000) -> Awaitable:
+
+async def run_for_degrees(
+    port: int,
+    degrees: int,
+    velocity: int,
+    *,
+    stop: int = BRAKE,
+    acceleration: int = 1000,
+    deceleration: int = 1000,
+) -> Awaitable:
     """
     Turn a motor for a specific number of degrees. When awaited returns a status of the movement that corresponds to one of the following constants:
 
@@ -153,11 +167,22 @@ async def run_for_degrees(port: int, degrees: int, velocity: int, *, stop: int =
     assert port in range(6), "Invalid port"
     assert isinstance(degrees, int), "Degrees must be an integer"
     assert -10_000 <= velocity <= 10_000, "Invalid velocity"
-    assert stop in (COAST, BRAKE, HOLD, CONTINUE, SMART_COAST, SMART_BRAKE), "Invalid stop behavior"
+    assert stop in (COAST, BRAKE, HOLD, CONTINUE, SMART_COAST, SMART_BRAKE), (
+        "Invalid stop behavior"
+    )
     assert 1 <= acceleration <= 10_000, "Invalid acceleration"
     assert 1 <= deceleration <= 10_000, "Invalid deceleration"
 
-async def run_for_time(port: int, duration: int, velocity: int, *, stop: int = BRAKE, acceleration: int = 1000, deceleration: int = 1000) -> Awaitable:
+
+async def run_for_time(
+    port: int,
+    duration: int,
+    velocity: int,
+    *,
+    stop: int = BRAKE,
+    acceleration: int = 1000,
+    deceleration: int = 1000,
+) -> Awaitable:
     """
     Run a Motor for a limited amount of time. When awaited returns a status of the movement that corresponds to one of the following constants:
 
@@ -175,13 +200,13 @@ async def run_for_time(port: int, duration: int, velocity: int, *, stop: int = B
     import motor
 
     async def main():
-        # Run at 1000 velocity for 1 second 
+        # Run at 1000 velocity for 1 second
         await motor.run_for_time(port.A, 1000, 1000)
 
-        # Run at 280 velocity for 1 second 
+        # Run at 280 velocity for 1 second
         await motor_pair.run_for_time(port.A, 1000, 280)
 
-        # Run at 280 velocity for 10 seconds with a slow deceleration 
+        # Run at 280 velocity for 10 seconds with a slow deceleration
         await motor_pair.run_for_time(port.A, 10000, 280, deceleration=10)
 
     runloop.run(main())
@@ -225,12 +250,24 @@ async def run_for_time(port: int, duration: int, velocity: int, *, stop: int = B
         The deceleration (deg/sec²) (1 - 10000)
     """
     assert port in range(6), "Invalid port"
-    assert stop in (COAST, BRAKE, HOLD, CONTINUE, SMART_COAST, SMART_BRAKE), "Invalid stop behavior"
+    assert stop in (COAST, BRAKE, HOLD, CONTINUE, SMART_COAST, SMART_BRAKE), (
+        "Invalid stop behavior"
+    )
     assert -10_000 <= velocity <= 10_000, "Invalid velocity"
     assert 1 <= acceleration <= 10_000, "Invalid acceleration"
     assert 1 <= deceleration <= 10_000, "Invalid deceleration"
 
-async def run_to_absolute_position(port: int, position: int, velocity: int, *, direction: int = SHORTEST_PATH, stop: int = BRAKE, acceleration: int = 1000, deceleration: int = 1000) -> Awaitable:
+
+async def run_to_absolute_position(
+    port: int,
+    position: int,
+    velocity: int,
+    *,
+    direction: int = SHORTEST_PATH,
+    stop: int = BRAKE,
+    acceleration: int = 1000,
+    deceleration: int = 1000,
+) -> Awaitable:
     """
     Turn a motor to an absolute position. When awaited returns a status of the movement that corresponds to one of the following constants:
 
@@ -279,11 +316,19 @@ async def run_to_absolute_position(port: int, position: int, velocity: int, *, d
         The deceleration (deg/sec²) (1 - 10000)
     """
     assert port in range(6), "Invalid port"
-    assert direction in (CLOCKWISE, COUNTERCLOCKWISE, SHORTEST_PATH, LONGEST_PATH), "Invalid direction"
-    assert stop in (COAST, BRAKE, HOLD, CONTINUE, SMART_COAST, SMART_BRAKE), "Invalid stop behavior"
+    assert direction in (
+        CLOCKWISE,
+        COUNTERCLOCKWISE,
+        SHORTEST_PATH,
+        LONGEST_PATH,
+    ), "Invalid direction"
+    assert stop in (COAST, BRAKE, HOLD, CONTINUE, SMART_COAST, SMART_BRAKE), (
+        "Invalid stop behavior"
+    )
     assert -10_000 <= velocity <= 10_000, "Invalid velocity"
     assert 1 <= acceleration <= 10_000, "Invalid acceleration"
     assert 1 <= deceleration <= 10_000, "Invalid deceleration"
+
 
 def set_duty_cycle(port: int, pwm: int) -> None:
     """
@@ -299,6 +344,7 @@ def set_duty_cycle(port: int, pwm: int) -> None:
     assert port in range(6), "Invalid port"
     assert -10_000 <= pwm <= 10_000, "Invalid PWM"
 
+
 def stop(port: int, *, stop: int = BRAKE) -> None:
     """
     Stop a motor.
@@ -309,13 +355,13 @@ def stop(port: int, *, stop: int = BRAKE) -> None:
     from hub import port
     import motor, time
 
-    # Start motor 
+    # Start motor
     motor.run(port.A, 1000)
 
-    # Wait for 2 seconds 
+    # Wait for 2 seconds
     time.sleep_ms(2000)
 
-    # Stop motor 
+    # Stop motor
     motor.stop(port.A)
     ```
 
@@ -335,7 +381,10 @@ def stop(port: int, *, stop: int = BRAKE) -> None:
         - `motor.SMART_BRAKE` to make the motor brake and continue to brake after stop and compensate for inaccuracies in the next command
     """
     assert port in range(6), "Invalid port"
-    assert stop in (COAST, BRAKE, HOLD, CONTINUE, SMART_COAST, SMART_BRAKE), "Invalid stop behavior"
+    assert stop in (COAST, BRAKE, HOLD, CONTINUE, SMART_COAST, SMART_BRAKE), (
+        "Invalid stop behavior"
+    )
+
 
 def velocity(port: int) -> int:
     """

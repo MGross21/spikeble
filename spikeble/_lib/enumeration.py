@@ -1,5 +1,6 @@
 from enum import IntEnum, unique
 
+
 @unique
 class Color(IntEnum):
     BLACK = 0x00
@@ -15,6 +16,7 @@ class Color(IntEnum):
     WHITE = 0x0A
     NONE = 0xFF
 
+
 @unique
 class HubPort(IntEnum):
     A = 0x00
@@ -23,6 +25,7 @@ class HubPort(IntEnum):
     D = 0x03
     E = 0x04
     F = 0x05
+
 
 @unique
 class HubFace(IntEnum):
@@ -33,21 +36,25 @@ class HubFace(IntEnum):
     BACK = 0x04
     LEFT = 0x05
 
+
 @unique
 class ProgramAction(IntEnum):
     START = 0x00
     STOP = 0x01
+
 
 @unique
 class ResponseStatus(IntEnum):
     ACKNOWLEDGED = 0x00
     NOT_ACKNOWLEDGED = 0x01
 
+
 @unique
 class MotorEndState(IntEnum):
     """
     Smart coast/brake: methods of stopping a motor that compensate for inaccuracies when following commands.
     """
+
     COAST = 0x00
     BRAKE = 0x01
     HOLD = 0x02
@@ -56,12 +63,14 @@ class MotorEndState(IntEnum):
     BRAKE_SMART = 0x05
     DEFAULT = 0xFF
 
+
 @unique
 class MotorMoveDirection(IntEnum):
     CLOCKWISE = 0x00
     COUNTERCLOCKWISE = 0x01
     SHORTEST_PATH = 0x02
     LONGEST_PATH = 0x03
+
 
 @unique
 class MotorDeviceType(IntEnum):

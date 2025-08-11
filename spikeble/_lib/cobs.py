@@ -21,6 +21,7 @@ MAX_BLOCK_SIZE = 84
 XOR = 3
 """XOR mask for encoding"""
 
+
 # Source: https://lego.github.io/spike-prime-docs/encoding.html#cobs-encode
 def encode(data: bytes):
     """
@@ -28,6 +29,7 @@ def encode(data: bytes):
     """
     buffer = bytearray()
     code_index = block = 0
+
     def begin_block():
         """Append code word to buffer and update code_index and block"""
         nonlocal code_index, block
@@ -57,6 +59,7 @@ def encode(data: bytes):
     buffer[code_index] = block + COBS_CODE_OFFSET
 
     return buffer
+
 
 # Source: https://lego.github.io/spike-prime-docs/encoding.html#cobs-decode
 def decode(data: bytes):
@@ -91,6 +94,7 @@ def decode(data: bytes):
         value, block = unescape(byte)
 
     return buffer
+
 
 # Source: https://lego.github.io/spike-prime-docs/encoding.html#cobs-pack
 def pack(data: bytes):
