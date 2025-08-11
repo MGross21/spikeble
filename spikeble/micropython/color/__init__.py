@@ -1,3 +1,5 @@
+"The color module contains all the color constants to use with the color_matrix, color_sensor and light modules."
+
 BLACK     = 0
 MAGENTA   = 1
 PURPLE    = 2

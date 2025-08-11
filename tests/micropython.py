@@ -4,6 +4,7 @@ def main():
 
     from hub import port
     import motor, time
+    import force_sensor
 
     # Start motor 
     motor.run(port.A, 1000)
