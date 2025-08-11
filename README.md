@@ -18,24 +18,34 @@ pip install git+https://github.com/MGross21/spikeble.git
 
 ## Running Code on SPIKE
 
-To use MicroPython APIs with auto-complete, place all MicroPython imports inside your `main()` function.
+To enable auto-complete for MicroPython APIs, place all MicroPython imports inside your `main()` function.  
+Use the template below as a starting point for your SPIKE code:
 
 ```python
-from spikeble import Spike
+import spikeble
 
 def main():
-    from hub import port
-    import motor, time
+    from app import sound, bargraph, display, linegraph, music
+    import color
+    import color_matrix
+    import color_sensor
+    import device
+    import distance_sensor
+    import force_sensor
+    from hub import port, button, light, light_matrix, motion_sensor, sound
+    import motor
+    import motor_pair
+    import orientation
+    import runloop
 
-    # Start motor
-    motor.run(port.A, 1000)
+    ### Insert Your Code Here ###
 
 if __name__ == "__main__":
-    await Spike.run(main())
+    spikeble.run(main())
 ```
 
 ## Documentation
 
-- [GitHub Docs](https://github.com/LEGO/spike-prime-docs)
-- [API Reference](https://spike.legoeducation.com/prime/modal/help/lls-help-python)
+<!-- - [GitHub Docs](https://github.com/LEGO/spike-prime-docs) -->
+- [Official API Reference](https://spike.legoeducation.com/prime/modal/help/lls-help-python)
 <!-- - [Spike 3 Python Docs (Unofficial)](https://tuftsceeo.github.io/SPIKEPythonDocs/SPIKE3.html) -->

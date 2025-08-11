@@ -1,13 +1,21 @@
-from spikeble import Spike
+import spikeble
 
 def main():
-
-    from hub import port
-    import motor, time
+    from app import sound, bargraph, display, linegraph, music
+    import color
+    import color_matrix
+    import color_sensor
+    import device
+    import distance_sensor
     import force_sensor
+    import hub
+    from hub import port, button, light, light_matrix, motion_sensor, sound
+    import motor
+    import motor_pair
+    import orientation
+    import runloop
 
-    # Start motor 
-    motor.run(port.A, 1000)
+    ### Insert Your Code Here ###
 
 if __name__ == "__main__":
-    Spike.run(main())
+    spikeble.run(main())
