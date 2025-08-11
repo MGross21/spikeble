@@ -452,5 +452,3 @@ def unpair(pair: int) -> None:
         The pair slot of the Motor Pair.
     """
     pass
-
-
