@@ -1,4 +1,4 @@
-"The distance_sensor module enables you to write code that reacts to specific distances or light up the Distance Sensor in different ways."
+"""The distance_sensor module enables you to write code that reacts to specific distances or light up the Distance Sensor in different ways."""
 
 async def clear(port: int) -> None:
     "Turns off all the lights in the Distance Sensor connected to `port`."
