@@ -9,7 +9,7 @@
 
 ## Installation
 
-```bash
+```console
 pip install git+https://github.com/MGross21/spikeble.git
 ```
 
