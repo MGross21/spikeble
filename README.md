@@ -15,8 +15,6 @@ pip install git+https://github.com/MGross21/spikeble.git
 
 > **⚠️ Warning:**  
 > It is **highly recommended** to install and use this library within a Python virtual environment. Installing `spikeble` will expose all MicroPython modules (such as `app`, `color`, `color_matrix`, `color_sensor`, `device`, `distance_sensor`, `force_sensor`, `hub`, `motor`, `motor_pair`, `orientation`, and `runloop`) as direct imports in your environment. Using a virtual environment prevents conflicts with other Python projects and keeps your global Python installation clean.
-> **⚠️ Warning:**  
-> It is **highly recommended** to install and use this library within a Python virtual environment. Installing `spikeble` will expose all MicroPython modules (such as `app`, `color`, `color_matrix`, `color_sensor`, `device`, `distance_sensor`, `force_sensor`, `hub`, `motor`, `motor_pair`, `orientation`, and `runloop`) as direct imports in your environment. Using a virtual environment prevents conflicts with other Python projects and keeps your global Python installation clean.
 >
 > <details>
 > <summary><strong>Making a Python Virtual Environment</strong></summary>
