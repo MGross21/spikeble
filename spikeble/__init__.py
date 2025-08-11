@@ -30,7 +30,6 @@ async def run_file(
     stay_connected: bool = False,
 ):
     from .spike import logger
-    from ._utils import func_to_string
     from pathlib import Path
     if not Path(program_path).exists():
         logger.error(f"File not found: {program_path}")
