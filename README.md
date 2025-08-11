@@ -41,6 +41,7 @@ Use the template below as a starting point for your SPIKE code:
 
 ```python
 import spikeble
+import asyncio
 
 def main():
     from app import sound, bargraph, display, linegraph, music
@@ -59,7 +60,7 @@ def main():
     ### Insert Your Code Here ###
 
 if __name__ == "__main__":
-    spikeble.run(main())
+    asyncio.run(spikeble.run(main))
 ```
 
 ## Documentation
