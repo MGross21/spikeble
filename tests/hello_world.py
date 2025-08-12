@@ -65,7 +65,6 @@ EXAMPLE_SLOT = 0
 
 EXAMPLE_PROGRAM = """import runloop
 from hub import light_matrix
-import app
 print("Console message from hub.")
 async def main():
     await light_matrix.write("Hello, world!")
