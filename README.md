@@ -77,6 +77,6 @@ You can also run code on the SPIKE using the following methods:
 
 ## Documentation
 
-<!-- - [GitHub Docs](https://github.com/LEGO/spike-prime-docs) -->
-- [Official API Reference](https://spike.legoeducation.com/prime/modal/help/lls-help-python)
+- [MicroPython Docs](https://spike.legoeducation.com/prime/modal/help/lls-help-python)
+- [Communication Protocol](https://github.com/LEGO/spike-prime-docs)
 <!-- - [Spike 3 Python Docs (Unofficial)](https://tuftsceeo.github.io/SPIKEPythonDocs/SPIKE3.html) -->

@@ -176,7 +176,7 @@ class Spike:
         await self.connect()
         return self
 
-    async def __aexit__(self, exc_type, exc, tb) -> None:
+    async def __aexit__(self, _, __, ___) -> None:
         await self.disconnect()
 
     @staticmethod

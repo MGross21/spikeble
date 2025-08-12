@@ -4,7 +4,6 @@ async def run_fn(
     program: Callable,
     *,
     slot: int = 0,
-    name: str = "program.py",
     stay_connected: bool = False,
 ):
     from .spike import logger
@@ -17,7 +16,7 @@ async def run_fn(
     await run_str(
         func_to_string(program),
         slot=slot,
-        name=name,
+        name=program.__name__ + ".py",
         stay_connected=stay_connected
     )
 
@@ -63,4 +62,7 @@ async def run_str(
         await hub.upload_program(program_str.encode("utf-8"), name=name)
         await hub.start_program()
         if stay_connected:
-            await hub.run_until_disconnect()
+            try:
+                await hub.run_until_disconnect()
+            except KeyboardInterrupt:
+                await hub.disconnect()
