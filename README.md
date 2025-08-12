@@ -9,6 +9,14 @@
 
 ## Installation
 
+*From PyPI:*
+
+```console
+pip install spikeble
+```
+
+*From GitHub:*
+
 ```console
 pip install git+https://github.com/MGross21/spikeble.git
 ```
