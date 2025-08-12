@@ -194,12 +194,17 @@ class Spike:
 
         logger.debug(f"Sending: {msg}")
         payload = msg.serialize()
+        print(f"Payload: {payload}")
         frame = cobs.pack(payload)
+        print(f"Frame: {frame}")
         packet_size = self._info.max_packet_size if self._info else len(frame)
+        print(f"Packet size: {packet_size}")
 
         for i in range(0, len(frame), packet_size):
+            chunk = frame[i : i + packet_size]
+            print(f"Chunk: {chunk}")
             await self._client.write_gatt_char(
-                self._rx, frame[i : i + packet_size], response=False
+                self._rx, chunk, response=False
             )
 
     async def _send_request(self, msg: BaseMessage, resp_t: Type[TM]) -> TM:
