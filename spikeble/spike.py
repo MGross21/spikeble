@@ -172,7 +172,7 @@ class Spike:
     ) -> None:
         self._notify_cb = cb
 
-    async def __aenter__(self) -> "Spike":
+    async def __aenter__(self) -> Spike:
         await self.connect()
         return self
 

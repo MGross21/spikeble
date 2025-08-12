@@ -34,8 +34,15 @@ async def run_file(
     if not Path(program_path).exists():
         logger.error(f"File not found: {program_path}")
         return
+
+    program_str = Path(program_path).read_text()
+    try:
+        compile(program_str, program_path, "exec")
+    except Exception as e:
+        logger.error(f"Error compiling {program_path}: {e}")
+        return
     await run_str(
-        Path(program_path).read_bytes(),
+        program_str,
         slot=slot,
         name=Path(program_path).name,
         stay_connected=stay_connected
@@ -53,7 +60,7 @@ async def run_str(
         await hub.get_info()
         await hub.enable_notifications()
         await hub.clear_slot()
-        await hub.upload_program(program_str, name=name)
+        await hub.upload_program(program_str.encode("utf-8"), name=name)
         await hub.start_program()
         if stay_connected:
             await hub.run_until_disconnect()
