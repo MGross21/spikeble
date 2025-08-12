@@ -7,7 +7,7 @@ import asyncio
 
 
 def main():
-    from app import sound, bargraph, display, linegraph, music
+    # from app import sound, bargraph, display, linegraph, music
     import color
     import color_matrix
     import color_sensor

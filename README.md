@@ -44,7 +44,7 @@ import spikeble
 import asyncio
 
 def main():
-    from app import sound, bargraph, display, linegraph, music
+    # from app import sound, bargraph, display, linegraph, music
     import color
     import color_matrix
     import color_sensor
@@ -63,16 +63,19 @@ if __name__ == "__main__":
     asyncio.run(spikeble.run(main))
 ```
 
+> **Note:**  
+> As of Spike firmware 1.8.149 and rpc 1.0.47, importing the `app` module (i.e., `import app`) will result in an import error. The `app` import is currently disabled.
+
 ### Other Send Methods
 
 You can also run code on the SPIKE using the following methods:
 
 ```python
-... spikeble.run_file("path/to/your_script.py") ...
+spikeble.run_file("path/to/your_script.py")
 ```
 
 ```python
-... spikeble.run_str("print('Hello from SPIKE!')") ...
+spikeble.run_str("print('Hello from SPIKE!')")
 ```
 
 ## Documentation

@@ -1,20 +1,21 @@
 from typing import Callable
 
 async def run_fn(
-    program: Callable,
+    program: Callable[[], None],
     *,
     slot: int = 0,
     stay_connected: bool = False,
 ):
+    """Run a Python function on the SPIKE Prime hub."""
     from .spike import logger
-    from ._utils import func_to_string
+    from ._utils import fn_to_string
     try:
         # call function and see if any front-side errors trigger
         program()
     except Exception as e:
         logger.error(f"Error occurred while running program: {e}")
     await run_str(
-        func_to_string(program),
+        fn_to_string(program),
         slot=slot,
         name=program.__name__ + ".py",
         stay_connected=stay_connected
@@ -28,6 +29,7 @@ async def run_file(
     slot: int = 0,
     stay_connected: bool = False,
 ):
+    """Run a Python file on the SPIKE Prime hub."""
     from .spike import logger
     from pathlib import Path
     if not Path(program_path).exists():
@@ -54,6 +56,7 @@ async def run_str(
     name: str = "program.py",
     stay_connected: bool = False,
 ):
+    """Run a Python string as code on the SPIKE Prime hub."""
     from .spike import Spike
     async with Spike(timeout=10, slot=slot) as hub:
         await hub.get_info()
