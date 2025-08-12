@@ -64,7 +64,7 @@ if __name__ == "__main__":
 ```
 
 > **Note:**  
-> As of Spike firmware 1.8.149 and rpc 1.0.47, importing the `app` module (i.e., `import app`) will result in an import error. The `app` import is currently disabled.
+> As of `SPIKE™ Firmware v1.8.149` and `RPC v1.0.47`, using `import app` or `from app import ...` will result in an import error. The `app` module is currently disabled until further notice.
 
 ### Other Send Methods
 
