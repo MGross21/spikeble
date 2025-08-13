@@ -26,11 +26,6 @@ logger = logging.getLogger(__name__)
 class Spike:
     DEVICE_NOTIFICATION_INTERVAL_MS = 5000
 
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "_instance"):
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
     def __init__(self, timeout: int = 10, slot: int = 0) -> None:
         self.timeout = timeout
         self.slot = slot
@@ -194,17 +189,12 @@ class Spike:
 
         logger.debug(f"Sending: {msg}")
         payload = msg.serialize()
-        print(f"Payload: {[int(b) for b in payload]}")
         frame = cobs.pack(payload)
-        print(f"Frame: {[int(b) for b in frame]}")
         packet_size = self._info.max_packet_size if self._info else len(frame)
-        print(f"Packet size: {int(packet_size)}")
 
         for i in range(0, len(frame), packet_size):
-            chunk = frame[i : i + packet_size]
-            print(f"CRC: {crc(chunk)}, Chunk: {[int(b) for b in chunk]}")
             await self._client.write_gatt_char(
-                self._rx, chunk, response=False
+                self._rx, frame[i : i + packet_size], response=False
             )
 
     async def _send_request(self, msg: BaseMessage, resp_t: Type[TM]) -> TM:
