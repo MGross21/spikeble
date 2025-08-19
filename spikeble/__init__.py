@@ -14,6 +14,8 @@ async def run_fn(
         program()
     except Exception as e:
         logger.error(f"Error occurred while running program: {e}")
+        return
+    
     await run_str(
         fn_to_string(program),
         slot=slot,
@@ -32,6 +34,7 @@ async def run_file(
     """Run a Python file on the SPIKE Prime hub."""
     from .spike import logger
     from pathlib import Path
+    
     if not Path(program_path).exists():
         logger.error(f"File not found: {program_path}")
         return
@@ -42,6 +45,7 @@ async def run_file(
     except Exception as e:
         logger.error(f"Error compiling {program_path}: {e}")
         return
+    
     await run_str(
         program_str,
         slot=slot,

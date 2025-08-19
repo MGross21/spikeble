@@ -26,11 +26,6 @@ logger = logging.getLogger(__name__)
 class Spike:
     DEVICE_NOTIFICATION_INTERVAL_MS = 5000
 
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "_instance"):
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
     def __init__(self, timeout: int = 10, slot: int = 0) -> None:
         self.timeout = timeout
         self.slot = slot
