@@ -58,6 +58,8 @@ include = ["/spikeble", "/README.md", "/LICENSE*", "/pyproject.toml"]
 [tool.ruff]
 target-version = "py311"
 line-length = 80
+extend-exclude = ["stubs"]
+force-exclude = true
 lint.select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
 
 [tool.pytest.ini_options]
