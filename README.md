@@ -2,7 +2,7 @@
     <img src="https://raw.githubusercontent.com/MGross21/spikeble/main/assets/spikeble_logo.png" alt="spikeble logo" width="300" />
 </h1>
 <p align="center">
-    <sub>(pronounced "spike-able")</sub>
+    <sub>(pronounced "spike-ble")</sub>
     <br>
     <img src="https://raw.githubusercontent.com/MGross21/spikeble/main/assets/lego_spike.png" alt="Lego Spike"/>
 </p>
