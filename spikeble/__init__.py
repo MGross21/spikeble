@@ -9,17 +9,18 @@ async def run_fn(
     """Run a Python function on the SPIKE Prime hub."""
     from .spike import logger
     from ._utils import fn_to_string
+    name = program.__name__ + ".py"
+    program_str = fn_to_string(program)
     try:
-        # call function and see if any front-side errors trigger
-        program()
+        compile(program_str, name, "exec")
     except Exception as e:
-        logger.error(f"Error occurred while running program: {e}")
+        logger.error(f"Error compiling {name}: {e}")
         return
-    
+
     await run_str(
-        fn_to_string(program),
+        program_str,
         slot=slot,
-        name=program.__name__ + ".py",
+        name=name,
         stay_connected=stay_connected
     )
 

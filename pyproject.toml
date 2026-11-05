@@ -35,29 +35,30 @@ raw-options = { local_scheme = "no-local-version" }
 packages = ["spikeble"]
 include = ["spikeble/py.typed"]
 
-# Expose MicroPython folders as top-level install packages
 [tool.hatch.build.targets.wheel.force-include]
-"spikeble/micropython/app" = "app"
-"spikeble/micropython/color" = "color"
-"spikeble/micropython/color_matrix" = "color_matrix"
-"spikeble/micropython/color_sensor" = "color_sensor"
-"spikeble/micropython/device" = "device"
-"spikeble/micropython/distance_sensor" = "distance_sensor"
-"spikeble/micropython/force_sensor" = "force_sensor"
-"spikeble/micropython/hub" = "hub"
-"spikeble/micropython/motor" = "motor"
-"spikeble/micropython/motor_pair" = "motor_pair"
-"spikeble/micropython/orientation" = "orientation"
-"spikeble/micropython/runloop" = "runloop"
+"stubs/app-stubs" = "app-stubs"
+"stubs/color-stubs" = "color-stubs"
+"stubs/color_matrix-stubs" = "color_matrix-stubs"
+"stubs/color_sensor-stubs" = "color_sensor-stubs"
+"stubs/device-stubs" = "device-stubs"
+"stubs/distance_sensor-stubs" = "distance_sensor-stubs"
+"stubs/force_sensor-stubs" = "force_sensor-stubs"
+"stubs/hub-stubs" = "hub-stubs"
+"stubs/motor-stubs" = "motor-stubs"
+"stubs/motor_pair-stubs" = "motor_pair-stubs"
+"stubs/orientation-stubs" = "orientation-stubs"
+"stubs/runloop-stubs" = "runloop-stubs"
 
 [tool.hatch.build.targets.sdist]
-include = ["/spikeble", "/README.md", "/LICENSE*", "/pyproject.toml"]
+include = ["/spikeble", "/stubs", "/README.md", "/LICENSE*", "/pyproject.toml"]
 
 # ---- Tooling ---------------------------------------------------------------
 
 [tool.ruff]
 target-version = "py311"
 line-length = 80
+extend-exclude = ["stubs"]
+force-exclude = true
 lint.select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
 
 [tool.pytest.ini_options]

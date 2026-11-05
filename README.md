@@ -2,7 +2,7 @@
     <img src="https://raw.githubusercontent.com/MGross21/spikeble/main/assets/spikeble_logo.png" alt="spikeble logo" width="300" />
 </h1>
 <p align="center">
-    <sub>(pronounced "spike-able")</sub>
+    <sub>(pronounced "spike-ble")</sub>
     <br>
     <img src="https://raw.githubusercontent.com/MGross21/spikeble/main/assets/lego_spike.png" alt="Lego Spike"/>
 </p>
@@ -21,31 +21,12 @@ pip install spikeble
 pip install git+https://github.com/MGross21/spikeble.git
 ```
 
-> **⚠️ Warning:**  
-> It is **highly recommended** to install and use this library within a Python virtual environment. Installing `spikeble` will expose all MicroPython modules (such as `app`, `color`, `color_matrix`, `color_sensor`, `device`, `distance_sensor`, `force_sensor`, `hub`, `motor`, `motor_pair`, `orientation`, and `runloop`) as direct imports in your environment. Using a virtual environment prevents conflicts with other Python projects and keeps your global Python installation clean.
->
-> <details>
-> <summary><strong>Making a Python Virtual Environment</strong></summary>
->
-> ```bash
-> python -m venv .venv
->
-> # Activate the virtual environment
-> # On Windows:
-> venv\Scripts\activate
->
-> # On macOS/Linux:
-> source venv/bin/activate
-> ```
->
-> Once activated, you can install `spikeble` and other dependencies.
->
-> </details>
+> **Note:**
+> `spikeble` ships type stubs (`.pyi`) for the SPIKE MicroPython modules (`app`, `color`, `color_matrix`, `color_sensor`, `device`, `distance_sensor`, `force_sensor`, `hub`, `motor`, `motor_pair`, `orientation`, `runloop`). Editors get auto-complete and type checking, but the modules are not importable on your computer; they only exist on the hub. Pyright/Pylance may warn that an import "could not be resolved from source"; silence it with `reportMissingModuleSource = false`.
 
 ## Running Code on SPIKE
 
-To enable auto-complete for MicroPython APIs, place all MicroPython imports inside your `main()` function.  
-Use the template below as a starting point for your SPIKE code:
+`spikeble.run(main)` uploads the body of `main()` to the hub without running it locally, so all MicroPython imports must go inside `main()`. Use the template below as a starting point for your SPIKE code:
 
 ```python
 import spikeble
@@ -90,4 +71,13 @@ spikeble.run_str("print('Hello from SPIKE!')")
 
 - [MicroPython Docs](https://spike.legoeducation.com/prime/modal/help/lls-help-python)
 - [Communication Protocol](https://github.com/LEGO/spike-prime-docs)
+
+## Updating the Stubs
+
+The stubs in `stubs/` are generated from LEGO's official SPIKE App help content. To regenerate them, or to check whether they are out of date:
+
+```console
+python scripts/gen_stubs.py
+python scripts/gen_stubs.py --check
+```
 <!-- - [Spike 3 Python Docs (Unofficial)](https://tuftsceeo.github.io/SPIKEPythonDocs/SPIKE3.html) -->
